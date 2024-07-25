@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Creating a StatefulWidget to keep track of the form fields' state.
+// Creating a StatefulWidget to track the state of the form fields.
 class MyCustomForm extends StatefulWidget {
   @override
   _MyCustomFormState createState() => _MyCustomFormState();
@@ -38,7 +40,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text('Flutter Simple Login App', textAlign: TextAlign.center),
+          Text('Hello, Welcome to the login app!', textAlign: TextAlign.center),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
@@ -76,9 +78,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
               onPressed: () {
+                // Button to submit the form.
                 if (_formKey.currentState?.validate() ?? false) {
-                  // If the form is valid, you can perform an action here.
-                  // For example, you could save the login information to a database.
+                  // If the form is valid, process the login.
+                  _login();
                 }
               },
               child: Text('Login'),
@@ -87,5 +90,26 @@ class _MyCustomFormState extends State<MyCustomForm> {
         ],
       ),
     );
+  }
+
+  Future<void> _login() async {
+    final response = await http.post(
+      Uri.parse('http://localhost:5000/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Login successful.
+      print('Login successful: ${response.body}');
+    } else {
+      // Login failed.
+      print('Login failed: ${response.body}');
+    }
   }
 }
